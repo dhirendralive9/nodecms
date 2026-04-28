@@ -1,0 +1,73 @@
+<%- include('partials/header') %>
+
+<% if (theme.hero && theme.hero.enabled) { %>
+<section class="hero" style="min-height:<%= theme.hero.height || '400px' %>">
+  <div class="container hero-content">
+    <h1><%= site.title %></h1>
+    <p><%= site.tagline %></p>
+  </div>
+</section>
+<% } %>
+
+<main class="site-main">
+  <div class="container content-layout<%= theme.components.showSidebar ? ' with-sidebar sidebar-' + theme.layout.sidebarPosition : '' %>">
+    <div class="content-area">
+      <% if (posts.length === 0) { %>
+        <div class="empty-notice">
+          <h2>Welcome to <%= site.title %></h2>
+          <p>No posts published yet. Head to the <a href="/admin">admin panel</a> to create your first post.</p>
+        </div>
+      <% } %>
+
+      <div class="posts-grid<%= theme.components.postListStyle === 'cards' ? ' card-style' : '' %>">
+        <% posts.forEach(post => { %>
+          <article class="post-card">
+            <% if (post.featuredImage) { %>
+              <a href="/post/<%= post.slug %>" class="post-card-image">
+                <img src="<%= post.featuredImage %>" alt="<%= post.title %>" loading="lazy">
+              </a>
+            <% } %>
+            <div class="post-card-body">
+              <% if (theme.components.showCategories && post.categories.length) { %>
+                <div class="post-categories">
+                  <% post.categories.forEach(cat => { %>
+                    <a href="/category/<%= encodeURIComponent(cat) %>" class="category-link"><%= cat %></a>
+                  <% }) %>
+                </div>
+              <% } %>
+              <h2 class="post-card-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h2>
+              <p class="post-card-excerpt"><%= post.excerpt %></p>
+              <div class="post-meta">
+                <% if (theme.components.showAuthor && post.author) { %>
+                  <span class="meta-author"><%= post.author.displayName || post.author.username %></span>
+                <% } %>
+                <% if (theme.components.showDate) { %>
+                  <span class="meta-date"><%= (post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                <% } %>
+                <% if (theme.components.showReadTime) { %>
+                  <span class="meta-read-time"><%= Math.max(1, Math.ceil((post.content || '').replace(/<[^>]*>/g,'').split(/\s+/).length / 200)) %> min read</span>
+                <% } %>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+
+      <% if (pagination.total > 1) { %>
+        <nav class="pagination">
+          <% if (pagination.hasPrev) { %>
+            <a href="/?page=<%= pagination.current - 1 %>" class="page-link">← Newer</a>
+          <% } %>
+          <span class="page-info">Page <%= pagination.current %> of <%= pagination.total %></span>
+          <% if (pagination.hasNext) { %>
+            <a href="/?page=<%= pagination.current + 1 %>" class="page-link">Older →</a>
+          <% } %>
+        </nav>
+      <% } %>
+    </div>
+
+    <%- include('partials/sidebar') %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

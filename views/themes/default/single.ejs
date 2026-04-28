@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<main class="site-main">
+  <div class="container content-layout<%= theme.components.showSidebar ? ' with-sidebar sidebar-' + theme.layout.sidebarPosition : '' %>">
+    <div class="content-area">
+      <article class="single-post">
+        <header class="post-header">
+          <% if (theme.components.showCategories && post.categories.length) { %>
+            <div class="post-categories">
+              <% post.categories.forEach(cat => { %>
+                <a href="/category/<%= encodeURIComponent(cat) %>" class="category-link"><%= cat %></a>
+              <% }) %>
+            </div>
+          <% } %>
+          <h1><%= post.title %></h1>
+          <div class="post-meta">
+            <% if (theme.components.showAuthor && post.author) { %>
+              <div class="meta-author-full">
+                <% if (post.author.avatar) { %>
+                  <img src="<%= post.author.avatar %>" alt="" class="author-avatar">
+                <% } %>
+                <span><%= post.author.displayName || post.author.username %></span>
+              </div>
+            <% } %>
+            <% if (theme.components.showDate) { %>
+              <span class="meta-date"><%= (post.publishedAt || post.createdAt).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+            <% } %>
+            <% if (theme.components.showReadTime) { %>
+              <span class="meta-read-time"><%= Math.max(1, Math.ceil(post.content.replace(/<[^>]*>/g,'').split(/\s+/).length / 200)) %> min read</span>
+            <% } %>
+          </div>
+        </header>
+
+        <% if (post.featuredImage) { %>
+          <div class="post-featured-image">
+            <img src="<%= post.featuredImage %>" alt="<%= post.title %>">
+          </div>
+        <% } %>
+
+        <div class="post-content prose">
+          <%- post.content %>
+        </div>
+
+        <% if (theme.components.showTags && post.tags.length) { %>
+          <div class="post-tags">
+            <% post.tags.forEach(tag => { %>
+              <a href="/tag/<%= encodeURIComponent(tag) %>" class="tag"><%= tag %></a>
+            <% }) %>
+          </div>
+        <% } %>
+
+        <% if (theme.components.showShareButtons) { %>
+          <div class="share-buttons">
+            <span>Share:</span>
+            <a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent(post.title) %>&url=<%= encodeURIComponent(site.url + '/post/' + post.slug) %>" target="_blank" rel="noopener">Twitter</a>
+            <a href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodeURIComponent(site.url + '/post/' + post.slug) %>" target="_blank" rel="noopener">LinkedIn</a>
+          </div>
+        <% } %>
+
+        <% if (theme.components.showAuthor && post.author && post.author.bio) { %>
+          <div class="author-box">
+            <% if (post.author.avatar) { %><img src="<%= post.author.avatar %>" alt="" class="author-avatar-lg"><% } %>
+            <div>
+              <h4><%= post.author.displayName || post.author.username %></h4>
+              <p><%= post.author.bio %></p>
+            </div>
+          </div>
+        <% } %>
+      </article>
+
+      <% if (theme.components.showRelatedPosts && relatedPosts.length) { %>
+        <section class="related-posts">
+          <h3>Related Posts</h3>
+          <div class="related-grid">
+            <% relatedPosts.forEach(rp => { %>
+              <a href="/post/<%= rp.slug %>" class="related-card">
+                <% if (rp.featuredImage) { %><img src="<%= rp.featuredImage %>" alt="<%= rp.title %>"><% } %>
+                <h4><%= rp.title %></h4>
+              </a>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
+    </div>
+
+    <%- include('partials/sidebar') %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

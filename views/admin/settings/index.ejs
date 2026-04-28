@@ -1,0 +1,292 @@
+<%- include('../../partials/admin-header') %>
+
+<div class="admin-header-bar">
+  <h1>Site Settings</h1>
+</div>
+
+<!-- Tab Navigation -->
+<div class="settings-tabs" style="display:flex;gap:0;margin-bottom:1.5rem">
+  <button class="settings-tab active" onclick="showTab('general')">General</button>
+  <button class="settings-tab" onclick="showTab('code-injection')">Code Injection</button>
+  <button class="settings-tab" onclick="showTab('image-optimization')">Image Optimization</button>
+</div>
+
+<!-- ─── Tab: General ─────────────────────────────────────── -->
+<div id="tab-general" class="settings-tab-content">
+  <form method="POST" action="/admin/settings">
+    <div class="editor-layout">
+      <div class="editor-main">
+        <div class="admin-card">
+          <div class="card-header"><h2>General</h2></div>
+          <div style="padding:1rem">
+            <div class="form-group">
+              <label>Site Title</label>
+              <input type="text" name="siteTitle" value="<%= settings.siteTitle || 'NodeCMS' %>" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Tagline</label>
+              <input type="text" name="siteTagline" value="<%= settings.siteTagline || '' %>" class="form-control" placeholder="A brief description of your site">
+            </div>
+            <div class="form-group">
+              <label>Site Logo URL</label>
+              <input type="text" name="siteLogo" value="<%= settings.siteLogo || '' %>" class="form-control" placeholder="/uploads/logo.png">
+            </div>
+            <div class="form-group">
+              <label>Favicon URL</label>
+              <input type="text" name="siteFavicon" value="<%= settings.siteFavicon || '' %>" class="form-control" placeholder="/uploads/favicon.ico">
+            </div>
+            <div class="form-group">
+              <label>Footer Text</label>
+              <input type="text" name="footerText" value="<%= settings.footerText || '' %>" class="form-control">
+            </div>
+            <div class="form-group">
+              <label>Posts Per Page</label>
+              <input type="number" name="postsPerPage" value="<%= settings.postsPerPage || 10 %>" class="form-control" min="1" max="50">
+            </div>
+
+            <!-- Global code injection fields (hidden, submitted with general form) -->
+            <input type="hidden" name="globalHeadCode" value="<%= settings.globalHeadCode || '' %>" id="hiddenHeadCode">
+            <input type="hidden" name="globalBodyCode" value="<%= settings.globalBodyCode || '' %>" id="hiddenBodyCode">
+          </div>
+        </div>
+      </div>
+      <div class="editor-sidebar">
+        <div class="sidebar-panel">
+          <button type="submit" class="btn btn-primary btn-full">Save Settings</button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ─── Tab: Code Injection ──────────────────────────────── -->
+<div id="tab-code-injection" class="settings-tab-content" style="display:none">
+  <form method="POST" action="/admin/settings">
+    <!-- Pass through general settings so they don't get wiped -->
+    <input type="hidden" name="siteTitle" value="<%= settings.siteTitle || 'NodeCMS' %>">
+    <input type="hidden" name="siteTagline" value="<%= settings.siteTagline || '' %>">
+    <input type="hidden" name="siteLogo" value="<%= settings.siteLogo || '' %>">
+    <input type="hidden" name="siteFavicon" value="<%= settings.siteFavicon || '' %>">
+    <input type="hidden" name="footerText" value="<%= settings.footerText || '' %>">
+    <input type="hidden" name="postsPerPage" value="<%= settings.postsPerPage || 10 %>">
+
+    <div class="editor-layout">
+      <div class="editor-main">
+        <div class="admin-card">
+          <div class="card-header"><h2>Global Header Code</h2></div>
+          <div style="padding:1rem">
+            <p style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem">
+              This code will be injected into the <code>&lt;head&gt;</code> section of <strong>every page</strong> on your site. Use it for analytics scripts (Google Analytics, Meta Pixel), custom CSS, font imports, meta tags, etc.
+            </p>
+            <textarea name="globalHeadCode" rows="10" class="code-textarea" placeholder="<!-- Example: Google Analytics -->
+<script async src='https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX'></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXX');
+</script>"><%= settings.globalHeadCode || '' %></textarea>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="card-header"><h2>Global Footer/Body Code</h2></div>
+          <div style="padding:1rem">
+            <p style="font-size:0.8rem;color:#64748b;margin-bottom:0.75rem">
+              This code will be injected before the closing <code>&lt;/body&gt;</code> tag on <strong>every page</strong>. Use it for chat widgets, tracking pixels, custom JS, etc.
+            </p>
+            <textarea name="globalBodyCode" rows="10" class="code-textarea" placeholder="<!-- Example: Chat widget -->
+<script src='https://widget.example.com/chat.js'></script>
+
+<!-- Example: Custom JS -->
+<script>
+  console.log('Hello from NodeCMS');
+</script>"><%= settings.globalBodyCode || '' %></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-sidebar">
+        <div class="sidebar-panel">
+          <button type="submit" class="btn btn-primary btn-full">Save Code Injection</button>
+        </div>
+        <div class="sidebar-panel">
+          <h3>How It Works</h3>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+            <strong>Global codes</strong> apply to every page on your site. For per-post or per-page code, use the "Code Injection" panel in the post/page editor.
+          </p>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+            <strong>Priority order:</strong>
+          </p>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+            1. Theme <code>theme.json</code> → <code>custom.headScripts</code><br>
+            2. Global head/body code (this page)<br>
+            3. Per-post/page code injection
+          </p>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+            All three layers stack — they don't override each other.
+          </p>
+        </div>
+        <div class="sidebar-panel">
+          <h3>Common Use Cases</h3>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+            • Google Analytics / GA4<br>
+            • Meta (Facebook) Pixel<br>
+            • Google Tag Manager<br>
+            • Custom fonts via <code>&lt;link&gt;</code><br>
+            • Live chat widgets (Crisp, Tawk.to)<br>
+            • Schema.org JSON-LD<br>
+            • Cookie consent banners<br>
+            • Custom CSS overrides
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ─── Tab: Image Optimization ──────────────────────────── -->
+<div id="tab-image-optimization" class="settings-tab-content" style="display:none">
+  <form method="POST" action="/admin/settings/image-optimization">
+    <div class="editor-layout">
+      <div class="editor-main">
+        <div class="admin-card">
+          <div class="card-header">
+            <h2>Image Optimization</h2>
+            <% if (sharpAvailable) { %>
+              <span class="badge badge-published">Sharp Installed</span>
+            <% } else { %>
+              <span class="badge badge-draft">Sharp Not Installed</span>
+            <% } %>
+          </div>
+          <div style="padding:1rem">
+            <% if (!sharpAvailable) { %>
+              <div class="alert alert-info" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;margin-bottom:1rem">
+                <strong>Sharp is not installed.</strong> Image optimization requires the Sharp library. Install it with:
+                <code style="display:block;margin-top:0.5rem;padding:0.5rem;background:#1e293b;color:#e2e8f0;border-radius:4px">npm install sharp</code>
+                <p style="margin-top:0.5rem;font-size:0.8rem">Sharp is optional — NodeCMS works fine without it. Images will be stored as-is.</p>
+              </div>
+            <% } %>
+
+            <div class="form-group">
+              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                <input type="checkbox" name="enabled" <%= imgSettings.enabled ? 'checked' : '' %> <%= !sharpAvailable ? 'disabled' : '' %>>
+                <strong>Enable image optimization</strong>
+              </label>
+              <small>When enabled, uploaded images are automatically processed</small>
+            </div>
+
+            <div style="border-top:1px solid #e2e8f0;padding-top:1rem;margin-top:0.5rem">
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                  <input type="checkbox" name="generateThumbnails" <%= imgSettings.generateThumbnails !== false ? 'checked' : '' %> <%= !sharpAvailable ? 'disabled' : '' %>>
+                  Generate thumbnails (300px small, 800px medium)
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                  <input type="checkbox" name="generateWebP" <%= imgSettings.generateWebP !== false ? 'checked' : '' %> <%= !sharpAvailable ? 'disabled' : '' %>>
+                  Generate WebP versions
+                </label>
+                <small>Creates a .webp copy alongside the original for smaller file sizes</small>
+              </div>
+
+              <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                  <input type="checkbox" name="compressOriginal" <%= imgSettings.compressOriginal ? 'checked' : '' %> <%= !sharpAvailable ? 'disabled' : '' %>>
+                  Compress original image
+                </label>
+                <small>Replaces the uploaded file with a compressed version (irreversible)</small>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem">
+                <div class="form-group">
+                  <label>JPEG/PNG Quality (1-100)</label>
+                  <input type="number" name="quality" value="<%= imgSettings.quality || 80 %>" class="form-control" min="1" max="100" <%= !sharpAvailable ? 'disabled' : '' %>>
+                </div>
+                <div class="form-group">
+                  <label>WebP Quality (1-100)</label>
+                  <input type="number" name="webpQuality" value="<%= imgSettings.webpQuality || 80 %>" class="form-control" min="1" max="100" <%= !sharpAvailable ? 'disabled' : '' %>>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-sidebar">
+        <div class="sidebar-panel">
+          <button type="submit" class="btn btn-primary btn-full" <%= !sharpAvailable ? 'disabled' : '' %>>Save Image Settings</button>
+        </div>
+        <div class="sidebar-panel">
+          <h3>What Gets Created</h3>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+            For each uploaded image (e.g. <code>photo.jpg</code>):
+          </p>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+            • <code>photo.jpg</code> — original<br>
+            • <code>photo-sm.jpg</code> — 300px thumbnail<br>
+            • <code>photo-md.jpg</code> — 800px medium<br>
+            • <code>photo.webp</code> — WebP version
+          </p>
+          <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+            All variants are auto-deleted when you delete the original from the media library.
+          </p>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<style>
+  .settings-tab {
+    padding: 0.55rem 1.25rem;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-right: none;
+    background: var(--admin-surface, #fff);
+    color: var(--admin-muted, #64748b);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .settings-tab:first-child { border-radius: 6px 0 0 6px; }
+  .settings-tab:last-child { border-radius: 0 6px 6px 0; border-right: 1px solid var(--admin-border, #e2e8f0); }
+  .settings-tab.active { background: var(--admin-primary, #2563eb); color: #fff; border-color: var(--admin-primary, #2563eb); }
+  .code-textarea {
+    width: 100%;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: 1rem;
+    border: 1px solid var(--admin-border, #e2e8f0);
+    border-radius: 6px;
+    background: #0f172a;
+    color: #e2e8f0;
+    resize: vertical;
+    tab-size: 2;
+  }
+  .code-textarea:focus { outline: none; border-color: var(--admin-primary, #2563eb); }
+  .alert-info { border-radius: 6px; padding: 1rem; font-size: 0.875rem; }
+</style>
+
+<script>
+function showTab(tabName) {
+  // Hide all tabs
+  document.querySelectorAll('.settings-tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.settings-tab').forEach(el => el.classList.remove('active'));
+
+  // Show selected tab
+  document.getElementById('tab-' + tabName).style.display = 'block';
+  event.target.classList.add('active');
+
+  // Sync hidden fields for code injection when switching away
+  const headCodeTextarea = document.querySelector('[name="globalHeadCode"]:not([type="hidden"])');
+  const bodyCodeTextarea = document.querySelector('[name="globalBodyCode"]:not([type="hidden"])');
+  if (headCodeTextarea) document.getElementById('hiddenHeadCode').value = headCodeTextarea.value;
+  if (bodyCodeTextarea) document.getElementById('hiddenBodyCode').value = bodyCodeTextarea.value;
+}
+</script>
+
+<%- include('../../partials/admin-footer') %>

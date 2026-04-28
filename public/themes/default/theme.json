@@ -1,0 +1,107 @@
+{
+  "name": "Flavor",
+  "version": "1.0.0",
+  "author": "NodeCMS",
+  "description": "A clean, modern default theme",
+
+  "colors": {
+    "primary":     "#2563eb",
+    "primaryHover": "#1d4ed8",
+    "secondary":   "#64748b",
+    "accent":      "#f59e0b",
+    "background":  "#ffffff",
+    "surface":     "#f8fafc",
+    "surfaceAlt":  "#f1f5f9",
+    "text":        "#0f172a",
+    "textMuted":   "#64748b",
+    "textLight":   "#94a3b8",
+    "border":      "#e2e8f0",
+    "success":     "#22c55e",
+    "warning":     "#f59e0b",
+    "danger":      "#ef4444",
+    "headerBg":    "#0f172a",
+    "headerText":  "#f8fafc",
+    "footerBg":    "#1e293b",
+    "footerText":  "#cbd5e1"
+  },
+
+  "typography": {
+    "headingFont": "'Playfair Display', Georgia, serif",
+    "bodyFont":    "'Source Sans 3', 'Segoe UI', sans-serif",
+    "monoFont":    "'JetBrains Mono', 'Fira Code', monospace",
+    "baseSize":    "17px",
+    "lineHeight":  "1.7",
+    "h1Size":      "2.5rem",
+    "h2Size":      "2rem",
+    "h3Size":      "1.5rem",
+    "h4Size":      "1.25rem"
+  },
+
+  "layout": {
+    "maxWidth":          "1200px",
+    "contentWidth":      "800px",
+    "sidebarPosition":   "right",
+    "sidebarWidth":      "320px",
+    "headerStyle":       "standard",
+    "headerPosition":    "sticky",
+    "footerColumns":     3,
+    "gridGap":           "2rem",
+    "borderRadius":      "8px",
+    "containerPadding":  "1.5rem"
+  },
+
+  "hero": {
+    "enabled":     true,
+    "style":       "gradient",
+    "height":      "400px",
+    "overlay":     true,
+    "overlayColor": "rgba(15, 23, 42, 0.6)"
+  },
+
+  "components": {
+    "showAuthor":       true,
+    "showDate":         true,
+    "showCategories":   true,
+    "showTags":         true,
+    "showReadTime":     true,
+    "showRelatedPosts": true,
+    "showShareButtons": true,
+    "showComments":     false,
+    "showSidebar":      true,
+    "showSearch":       true,
+    "showBackToTop":    true,
+    "postsPerPage":     10,
+    "excerptLength":    200,
+    "dateFormat":       "MMM DD, YYYY",
+    "postListStyle":    "cards"
+  },
+
+  "widgets": {
+    "sidebar": [
+      { "type": "search",     "title": "Search" },
+      { "type": "categories", "title": "Categories" },
+      { "type": "recentPosts","title": "Recent Posts", "count": 5 },
+      { "type": "tags",       "title": "Tags" }
+    ],
+    "footer": [
+      { "type": "about",  "title": "About", "content": "A lightweight CMS powered by NodeCMS." },
+      { "type": "links",  "title": "Quick Links" },
+      { "type": "social", "title": "Follow Us", "links": [] }
+    ]
+  },
+
+  "social": {
+    "twitter":  "",
+    "github":   "",
+    "linkedin": "",
+    "youtube":  "",
+    "facebook": ""
+  },
+
+  "custom": {
+    "customCSS":  "",
+    "customJS":   "",
+    "headScripts": "",
+    "bodyScripts": ""
+  }
+}

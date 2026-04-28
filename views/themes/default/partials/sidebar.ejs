@@ -1,0 +1,42 @@
+<% if (theme.components.showSidebar) { %>
+<aside class="sidebar">
+  <% (theme.widgets.sidebar || []).forEach(widget => { %>
+    <div class="widget widget-<%= widget.type %>">
+      <h3 class="widget-title"><%= widget.title %></h3>
+
+      <% if (widget.type === 'search') { %>
+        <form action="/search" method="GET" class="widget-search">
+          <input type="text" name="q" placeholder="Search..." class="widget-search-input">
+          <button type="submit" class="widget-search-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </form>
+      <% } %>
+
+      <% if (widget.type === 'recentPosts' && typeof sidebar !== 'undefined') { %>
+        <ul class="widget-list">
+          <% sidebar.recentPosts.forEach(rp => { %>
+            <li><a href="/post/<%= rp.slug %>"><%= rp.title %></a></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <% if (widget.type === 'categories' && typeof sidebar !== 'undefined') { %>
+        <ul class="widget-list">
+          <% sidebar.categories.forEach(cat => { %>
+            <li><a href="/category/<%= encodeURIComponent(cat) %>"><%= cat %></a></li>
+          <% }) %>
+        </ul>
+      <% } %>
+
+      <% if (widget.type === 'tags' && typeof sidebar !== 'undefined') { %>
+        <div class="widget-tags">
+          <% sidebar.tags.forEach(tag => { %>
+            <a href="/tag/<%= encodeURIComponent(tag) %>" class="tag"><%= tag %></a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  <% }) %>
+</aside>
+<% } %>

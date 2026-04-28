@@ -1,0 +1,11 @@
+<%- include('partials/header') %>
+
+<main class="site-main">
+  <div class="container" style="text-align:center;padding:6rem 2rem">
+    <h1 style="font-size:3rem;margin-bottom:0;color:var(--color-primary)">Error</h1>
+    <p style="color:var(--color-text-muted);margin:1rem 0 2rem"><%= typeof error !== 'undefined' ? error : 'Something went wrong' %></p>
+    <a href="/" class="btn-search" style="display:inline-block;text-decoration:none">← Back to Home</a>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

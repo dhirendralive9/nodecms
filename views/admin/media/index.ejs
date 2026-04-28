@@ -1,0 +1,72 @@
+<%- include('../../partials/admin-header') %>
+
+<div class="admin-header-bar">
+  <h1>Media Library</h1>
+  <label class="btn btn-primary" style="cursor:pointer">
+    + Upload Files
+    <input type="file" id="fileUpload" multiple accept="image/*,video/*,.pdf,.doc,.docx,.zip" style="display:none">
+  </label>
+</div>
+
+<div id="uploadProgress" style="display:none" class="admin-card">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <p id="uploadStatus">Uploading...</p>
+</div>
+
+<div class="admin-card">
+  <div class="media-grid-admin">
+    <% if (media.length === 0) { %>
+      <div class="empty-state" style="grid-column:1/-1;padding:3rem">No files uploaded yet</div>
+    <% } %>
+    <% media.forEach(item => { %>
+      <div class="media-card">
+        <div class="media-preview">
+          <% if (item.mimeType.startsWith('image/')) { %>
+            <img src="<%= item.url %>" alt="<%= item.alt || item.originalName %>">
+          <% } else { %>
+            <div class="file-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+            </div>
+          <% } %>
+        </div>
+        <div class="media-info">
+          <span class="media-name" title="<%= item.originalName %>"><%= item.originalName %></span>
+          <span class="media-meta"><%= (item.size / 1024).toFixed(1) %> KB</span>
+          <div class="media-actions">
+            <button class="btn btn-sm" onclick="navigator.clipboard.writeText('<%= item.url %>')">Copy URL</button>
+            <form method="POST" action="/admin/media/<%= item._id %>/delete" style="display:inline" onsubmit="return confirm('Delete this file?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<script>
+document.getElementById('fileUpload').addEventListener('change', async function(e) {
+  const files = e.target.files;
+  if (!files.length) return;
+
+  const formData = new FormData();
+  for (let f of files) formData.append('files', f);
+
+  document.getElementById('uploadProgress').style.display = 'block';
+  document.getElementById('uploadStatus').textContent = `Uploading ${files.length} file(s)...`;
+
+  try {
+    const res = await fetch('/admin/media/upload', { method: 'POST', body: formData });
+    if (res.ok) {
+      document.getElementById('uploadStatus').textContent = 'Upload complete!';
+      setTimeout(() => location.reload(), 500);
+    } else {
+      document.getElementById('uploadStatus').textContent = 'Upload failed';
+    }
+  } catch (err) {
+    document.getElementById('uploadStatus').textContent = 'Upload error: ' + err.message;
+  }
+});
+</script>
+
+<%- include('../../partials/admin-footer') %>

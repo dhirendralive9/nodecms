@@ -1,0 +1,64 @@
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <% (theme.widgets.footer || []).forEach(widget => { %>
+          <div class="footer-col">
+            <h4><%= widget.title %></h4>
+            <% if (widget.type === 'about') { %>
+              <p><%= widget.content || '' %></p>
+            <% } %>
+            <% if (widget.type === 'links' && menus.footer) { %>
+              <ul>
+                <% menus.footer.forEach(item => { %>
+                  <li><a href="<%= item.url %>"><%= item.label %></a></li>
+                <% }) %>
+              </ul>
+            <% } %>
+            <% if (widget.type === 'social') { %>
+              <div class="social-links">
+                <% if (theme.social.twitter) { %><a href="<%= theme.social.twitter %>" target="_blank">Twitter</a><% } %>
+                <% if (theme.social.github) { %><a href="<%= theme.social.github %>" target="_blank">GitHub</a><% } %>
+                <% if (theme.social.linkedin) { %><a href="<%= theme.social.linkedin %>" target="_blank">LinkedIn</a><% } %>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+      <div class="footer-bottom">
+        <p><%= site.footer %></p>
+        <p>Powered by <a href="#">NodeCMS</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <% if (theme.components.showBackToTop) { %>
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+    <script>
+      window.addEventListener('scroll', () => {
+        document.getElementById('backToTop').classList.toggle('visible', window.scrollY > 400);
+      });
+    </script>
+  <% } %>
+
+  <% if (theme.custom && theme.custom.customJS) { %>
+    <script><%= theme.custom.customJS %></script>
+  <% } %>
+  <% if (theme.custom && theme.custom.bodyScripts) { %>
+    <%- theme.custom.bodyScripts %>
+  <% } %>
+
+  <%/* Global body code injection from Settings */%>
+  <% if (site.globalBodyCode) { %>
+    <%- site.globalBodyCode %>
+  <% } %>
+
+  <%/* Per-post/page body code injection */%>
+  <% if (typeof post !== 'undefined' && post && post.codeInjection && post.codeInjection.bodyCode) { %>
+    <%- post.codeInjection.bodyCode %>
+  <% } %>
+  <% if (typeof page !== 'undefined' && page && page.codeInjection && page.codeInjection.bodyCode) { %>
+    <%- page.codeInjection.bodyCode %>
+  <% } %>
+</body>
+</html>

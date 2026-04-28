@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<main class="site-main">
+  <div class="container content-layout<%= theme.components.showSidebar ? ' with-sidebar sidebar-' + theme.layout.sidebarPosition : '' %>">
+    <div class="content-area">
+      <header class="archive-header">
+        <h1><%= archiveTitle %></h1>
+        <p><%= posts.length %> post<%= posts.length !== 1 ? 's' : '' %></p>
+      </header>
+      <div class="posts-grid">
+        <% posts.forEach(post => { %>
+          <article class="post-card">
+            <% if (post.featuredImage) { %>
+              <a href="/post/<%= post.slug %>" class="post-card-image">
+                <img src="<%= post.featuredImage %>" alt="<%= post.title %>" loading="lazy">
+              </a>
+            <% } %>
+            <div class="post-card-body">
+              <h2 class="post-card-title"><a href="/post/<%= post.slug %>"><%= post.title %></a></h2>
+              <p class="post-card-excerpt"><%= post.excerpt %></p>
+              <div class="post-meta">
+                <% if (post.author) { %>
+                  <span class="meta-author"><%= post.author.displayName || post.author.username %></span>
+                <% } %>
+                <span class="meta-date"><%= (post.publishedAt || post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+              </div>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+    <%- include('partials/sidebar') %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,246 @@
+<%- include('../../partials/admin-header') %>
+
+<div class="admin-header-bar">
+  <h1>Menus</h1>
+</div>
+
+<div class="editor-layout">
+  <div class="editor-main">
+    <% ['primary', 'footer', 'sidebar'].forEach(loc => { %>
+      <% const menu = menus.find(m => m.location === loc); %>
+      <div class="admin-card" style="margin-bottom:1.5rem">
+        <form method="POST" action="/admin/menus" id="menu-<%= loc %>">
+          <div class="card-header">
+            <h2 style="text-transform:capitalize"><%= loc %> Menu</h2>
+            <span class="badge" style="background:#f1f5f9;color:#475569;font-size:0.7rem">
+              <%= loc === 'primary' ? 'Header Nav' : loc === 'footer' ? 'Footer Links' : 'Sidebar' %>
+            </span>
+          </div>
+          <input type="hidden" name="location" value="<%= loc %>">
+          <input type="hidden" name="name" value="<%= loc %>">
+          <input type="hidden" name="items" id="items-<%= loc %>" value='<%= menu ? JSON.stringify(menu.items) : "[]" %>'>
+
+          <div id="menu-items-<%= loc %>" class="menu-items-list"></div>
+
+          <!-- Add New Item -->
+          <div style="padding:1rem;border-top:1px solid #e2e8f0">
+            <p style="font-size:0.75rem;font-weight:600;color:#64748b;margin-bottom:0.5rem;text-transform:uppercase">Add Menu Item</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+              <input type="text" id="new-label-<%= loc %>" placeholder="Label (e.g. About)" class="form-control">
+              <input type="text" id="new-url-<%= loc %>" placeholder="URL (e.g. /about)" class="form-control">
+              <input type="text" id="new-icon-<%= loc %>" placeholder="Icon HTML (optional)" class="form-control" style="font-size:0.8rem">
+              <input type="text" id="new-class-<%= loc %>" placeholder="CSS Class (optional)" class="form-control" style="font-size:0.8rem">
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.5rem">
+              <select id="new-target-<%= loc %>" class="form-control" style="width:auto">
+                <option value="_self">Same Tab</option>
+                <option value="_blank">New Tab</option>
+              </select>
+              <button type="button" class="btn btn-sm btn-primary" onclick="addMenuItem('<%= loc %>')">Add Item</button>
+            </div>
+          </div>
+
+          <!-- Add Sub-Item (Dropdown Child) -->
+          <div id="add-child-section-<%= loc %>" style="padding:1rem;border-top:1px solid #e2e8f0;display:none">
+            <p style="font-size:0.75rem;font-weight:600;color:#2563eb;margin-bottom:0.5rem">
+              Adding child to: <strong id="child-parent-label-<%= loc %>"></strong>
+              <button type="button" class="btn btn-sm btn-ghost" onclick="cancelAddChild('<%= loc %>')" style="float:right">Cancel</button>
+            </p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+              <input type="text" id="child-label-<%= loc %>" placeholder="Child label" class="form-control">
+              <input type="text" id="child-url-<%= loc %>" placeholder="Child URL" class="form-control">
+              <input type="text" id="child-icon-<%= loc %>" placeholder="Icon HTML (optional)" class="form-control" style="font-size:0.8rem">
+              <input type="text" id="child-class-<%= loc %>" placeholder="CSS Class (optional)" class="form-control" style="font-size:0.8rem">
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" onclick="addChildItem('<%= loc %>')" style="margin-top:0.5rem">Add Sub-Item</button>
+          </div>
+
+          <div style="padding:1rem;border-top:1px solid #e2e8f0">
+            <button type="submit" class="btn btn-primary">Save Menu</button>
+          </div>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="editor-sidebar">
+    <div class="sidebar-panel">
+      <h3>Menu Locations</h3>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+        <strong>Primary</strong> — Top header navigation bar. Supports dropdown sub-menus.<br><br>
+        <strong>Footer</strong> — Links in the footer area. Rendered as a flat list (no dropdowns).<br><br>
+        <strong>Sidebar</strong> — Links in the sidebar widget area.
+      </p>
+    </div>
+    <div class="sidebar-panel">
+      <h3>Dropdown Menus</h3>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+        Click <strong>"+ Sub"</strong> on any primary menu item to add child items underneath it. Children will render as a dropdown on hover.
+      </p>
+    </div>
+    <div class="sidebar-panel">
+      <h3>Icons</h3>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+        Paste inline SVG or an icon HTML snippet into the Icon field. For example:<br>
+        <code style="font-size:0.7rem;display:block;margin-top:0.25rem">&lt;svg width="16" height="16" ...&gt;&lt;/svg&gt;</code>
+      </p>
+    </div>
+    <div class="sidebar-panel">
+      <h3>CSS Classes</h3>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+        Add custom CSS classes to style individual menu items differently. E.g. <code>btn-cta</code> to make a menu item look like a button.
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .menu-item-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 0.875rem;
+    background: #fff;
+    transition: background 0.1s;
+  }
+  .menu-item-row:hover { background: #f8fafc; }
+  .menu-item-row .item-label { font-weight: 600; min-width: 80px; }
+  .menu-item-row .item-url { color: #64748b; font-size: 0.8rem; font-family: monospace; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-item-row .item-badges { display: flex; gap: 0.25rem; }
+  .menu-item-row .item-badge { font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 3px; background: #f1f5f9; color: #475569; }
+  .menu-child-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem 0.45rem 2.5rem;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.8rem;
+    background: #fafbfc;
+  }
+  .menu-child-row .item-label { font-weight: 500; }
+  .child-indicator { color: #94a3b8; font-size: 0.75rem; }
+</style>
+
+<script>
+let addChildParentIndex = {};
+
+function renderMenuItems(location) {
+  const input = document.getElementById('items-' + location);
+  const container = document.getElementById('menu-items-' + location);
+  const items = JSON.parse(input.value || '[]');
+
+  if (!items.length) {
+    container.innerHTML = '<p style="padding:1rem;color:#94a3b8;text-align:center">No items yet — add one below</p>';
+    return;
+  }
+
+  let html = '';
+  items.forEach((item, i) => {
+    html += `<div class="menu-item-row">
+      <span style="color:#94a3b8;cursor:grab">☰</span>
+      <span class="item-label">${item.label}</span>
+      <span class="item-url">${item.url}</span>
+      <span class="item-badges">
+        ${item.icon ? '<span class="item-badge">icon</span>' : ''}
+        ${item.cssClass ? '<span class="item-badge">' + item.cssClass + '</span>' : ''}
+        ${item.target === '_blank' ? '<span class="item-badge">↗</span>' : ''}
+        ${item.children && item.children.length ? '<span class="item-badge">' + item.children.length + ' sub</span>' : ''}
+      </span>
+      <button type="button" class="btn btn-sm" onclick="startAddChild('${location}', ${i})" title="Add sub-item">+ Sub</button>
+      <button type="button" class="btn btn-sm btn-danger" onclick="removeMenuItem('${location}', ${i})">×</button>
+    </div>`;
+
+    // Render children
+    if (item.children && item.children.length) {
+      item.children.forEach((child, ci) => {
+        html += `<div class="menu-child-row">
+          <span class="child-indicator">└─</span>
+          <span class="item-label">${child.label}</span>
+          <span class="item-url" style="flex:1">${child.url}</span>
+          ${child.icon ? '<span class="item-badge">icon</span>' : ''}
+          ${child.cssClass ? '<span class="item-badge">' + child.cssClass + '</span>' : ''}
+          <button type="button" class="btn btn-sm btn-danger" onclick="removeChild('${location}', ${i}, ${ci})">×</button>
+        </div>`;
+      });
+    }
+  });
+
+  container.innerHTML = html;
+}
+
+function addMenuItem(location) {
+  const label = document.getElementById('new-label-' + location).value.trim();
+  const url = document.getElementById('new-url-' + location).value.trim();
+  const icon = document.getElementById('new-icon-' + location).value.trim();
+  const cssClass = document.getElementById('new-class-' + location).value.trim();
+  const target = document.getElementById('new-target-' + location).value;
+  if (!label || !url) return alert('Label and URL are required');
+
+  const input = document.getElementById('items-' + location);
+  const items = JSON.parse(input.value || '[]');
+  items.push({ label, url, target, icon, cssClass, order: items.length, children: [] });
+  input.value = JSON.stringify(items);
+
+  // Clear inputs
+  ['label', 'url', 'icon', 'class'].forEach(f => document.getElementById('new-' + f + '-' + location).value = '');
+  renderMenuItems(location);
+}
+
+function removeMenuItem(location, index) {
+  if (!confirm('Remove this menu item and its children?')) return;
+  const input = document.getElementById('items-' + location);
+  const items = JSON.parse(input.value || '[]');
+  items.splice(index, 1);
+  input.value = JSON.stringify(items);
+  renderMenuItems(location);
+}
+
+function startAddChild(location, parentIndex) {
+  addChildParentIndex[location] = parentIndex;
+  const input = document.getElementById('items-' + location);
+  const items = JSON.parse(input.value || '[]');
+
+  document.getElementById('child-parent-label-' + location).textContent = items[parentIndex].label;
+  document.getElementById('add-child-section-' + location).style.display = 'block';
+  document.getElementById('child-label-' + location).focus();
+}
+
+function cancelAddChild(location) {
+  document.getElementById('add-child-section-' + location).style.display = 'none';
+  ['label', 'url', 'icon', 'class'].forEach(f => document.getElementById('child-' + f + '-' + location).value = '');
+}
+
+function addChildItem(location) {
+  const parentIndex = addChildParentIndex[location];
+  const label = document.getElementById('child-label-' + location).value.trim();
+  const url = document.getElementById('child-url-' + location).value.trim();
+  const icon = document.getElementById('child-icon-' + location).value.trim();
+  const cssClass = document.getElementById('child-class-' + location).value.trim();
+  if (!label || !url) return alert('Label and URL are required');
+
+  const input = document.getElementById('items-' + location);
+  const items = JSON.parse(input.value || '[]');
+
+  if (!items[parentIndex].children) items[parentIndex].children = [];
+  items[parentIndex].children.push({ label, url, target: '_self', icon, cssClass, order: items[parentIndex].children.length });
+  input.value = JSON.stringify(items);
+
+  cancelAddChild(location);
+  renderMenuItems(location);
+}
+
+function removeChild(location, parentIndex, childIndex) {
+  const input = document.getElementById('items-' + location);
+  const items = JSON.parse(input.value || '[]');
+  items[parentIndex].children.splice(childIndex, 1);
+  input.value = JSON.stringify(items);
+  renderMenuItems(location);
+}
+
+// Init
+['primary', 'footer', 'sidebar'].forEach(renderMenuItems);
+</script>
+
+<%- include('../../partials/admin-footer') %>

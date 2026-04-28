@@ -1,0 +1,150 @@
+<%- include('../../partials/admin-header') %>
+
+<div class="admin-header-bar">
+  <h1>Theme Editor</h1>
+  <div style="display:flex;gap:0.5rem;align-items:center">
+    <span style="color:#64748b;font-size:0.875rem">Active: <strong><%= activeTheme %></strong></span>
+  </div>
+</div>
+
+<div class="editor-layout">
+  <div class="editor-main">
+    <!-- Visual Editor -->
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div class="card-header"><h2>Colors</h2></div>
+      <div class="theme-colors-grid" style="padding:1rem">
+        <% Object.entries(themeConfig.colors || {}).forEach(([key, value]) => { %>
+          <div class="color-control">
+            <label><%= key %></label>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <input type="color" value="<%= value %>" data-color-key="<%= key %>" onchange="updateColor(this)">
+              <input type="text" value="<%= value %>" class="form-control" style="width:120px;font-size:0.8rem" data-color-text="<%= key %>" onchange="updateColorFromText(this)">
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="admin-card" style="margin-bottom:1.5rem">
+      <div class="card-header"><h2>Typography</h2></div>
+      <div style="padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label>Heading Font</label>
+          <input type="text" value="<%= themeConfig.typography?.headingFont || '' %>" class="form-control" id="typo-headingFont">
+        </div>
+        <div class="form-group">
+          <label>Body Font</label>
+          <input type="text" value="<%= themeConfig.typography?.bodyFont || '' %>" class="form-control" id="typo-bodyFont">
+        </div>
+        <div class="form-group">
+          <label>Base Size</label>
+          <input type="text" value="<%= themeConfig.typography?.baseSize || '16px' %>" class="form-control" id="typo-baseSize">
+        </div>
+        <div class="form-group">
+          <label>Line Height</label>
+          <input type="text" value="<%= themeConfig.typography?.lineHeight || '1.6' %>" class="form-control" id="typo-lineHeight">
+        </div>
+      </div>
+    </div>
+
+    <!-- Raw JSON Editor -->
+    <div class="admin-card">
+      <div class="card-header">
+        <h2>theme.json (Raw Editor)</h2>
+      </div>
+      <form method="POST" action="/admin/theme/save">
+        <div style="padding:1rem">
+          <textarea name="themeJson" id="jsonEditor" class="json-editor" rows="30"><%= themeJson %></textarea>
+          <div style="margin-top:1rem;display:flex;gap:0.5rem">
+            <button type="submit" class="btn btn-primary">Save Theme</button>
+            <button type="button" class="btn btn-ghost" onclick="formatJson()">Format JSON</button>
+            <button type="button" class="btn btn-ghost" onclick="validateJson()">Validate</button>
+          </div>
+          <div id="jsonStatus" style="margin-top:0.5rem;font-size:0.875rem"></div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="editor-sidebar">
+    <div class="sidebar-panel">
+      <h3>Available Themes</h3>
+      <% themes.forEach(t => { %>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #e2e8f0">
+          <span><%= t %> <%= t === activeTheme ? '✓' : '' %></span>
+          <% if (t !== activeTheme) { %>
+            <form method="POST" action="/admin/theme/activate" style="display:inline">
+              <input type="hidden" name="theme" value="<%= t %>">
+              <button type="submit" class="btn btn-sm">Activate</button>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="sidebar-panel">
+      <h3>Theme Guide</h3>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+        The <code>theme.json</code> file controls your entire site appearance. Edit colors, typography, layout, and component visibility without touching templates.
+      </p>
+      <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+        <strong>Sections:</strong> colors, typography, layout, hero, components, widgets, social, custom
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+function formatJson() {
+  const editor = document.getElementById('jsonEditor');
+  try {
+    const parsed = JSON.parse(editor.value);
+    editor.value = JSON.stringify(parsed, null, 2);
+    showStatus('JSON formatted', 'success');
+  } catch(e) {
+    showStatus('Invalid JSON: ' + e.message, 'error');
+  }
+}
+
+function validateJson() {
+  try {
+    JSON.parse(document.getElementById('jsonEditor').value);
+    showStatus('Valid JSON ✓', 'success');
+  } catch(e) {
+    showStatus('Invalid: ' + e.message, 'error');
+  }
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('jsonStatus');
+  el.textContent = msg;
+  el.style.color = type === 'success' ? '#16a34a' : '#ef4444';
+}
+
+function updateColor(input) {
+  const key = input.dataset.colorKey;
+  const textInput = document.querySelector(`[data-color-text="${key}"]`);
+  if (textInput) textInput.value = input.value;
+  syncColorsToJson();
+}
+
+function updateColorFromText(input) {
+  const key = input.dataset.colorText;
+  const colorInput = document.querySelector(`[data-color-key="${key}"]`);
+  if (colorInput) colorInput.value = input.value;
+  syncColorsToJson();
+}
+
+function syncColorsToJson() {
+  const editor = document.getElementById('jsonEditor');
+  try {
+    const config = JSON.parse(editor.value);
+    document.querySelectorAll('[data-color-key]').forEach(input => {
+      config.colors[input.dataset.colorKey] = input.value;
+    });
+    editor.value = JSON.stringify(config, null, 2);
+  } catch(e) {}
+}
+</script>
+
+<%- include('../../partials/admin-footer') %>

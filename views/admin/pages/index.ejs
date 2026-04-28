@@ -1,0 +1,41 @@
+<%- include('../../partials/admin-header') %>
+
+<div class="admin-header-bar">
+  <h1>Pages</h1>
+  <a href="/admin/pages/new" class="btn btn-primary">+ New Page</a>
+</div>
+
+<div class="admin-card">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Slug</th>
+        <th>Template</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (pages.length === 0) { %>
+        <tr><td colspan="5" class="empty-state">No pages yet. <a href="/admin/pages/new">Create your first page</a></td></tr>
+      <% } %>
+      <% pages.forEach(page => { %>
+        <tr>
+          <td><strong><a href="/admin/pages/<%= page._id %>/edit"><%= page.title %></a></strong></td>
+          <td><code>/<%= page.slug %></code></td>
+          <td><%= page.template %></td>
+          <td><span class="badge badge-<%= page.status %>"><%= page.status %></span></td>
+          <td class="actions">
+            <a href="/admin/pages/<%= page._id %>/edit" class="btn btn-sm">Edit</a>
+            <form method="POST" action="/admin/pages/<%= page._id %>/delete" style="display:inline" onsubmit="return confirm('Delete this page?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/admin-footer') %>
