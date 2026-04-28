@@ -8,7 +8,11 @@ const userSchema = new mongoose.Schema({
   role:     { type: String, enum: ['admin', 'editor', 'author'], default: 'author' },
   displayName: { type: String, trim: true },
   avatar:   { type: String, default: '' },
-  bio:      { type: String, default: '' }
+  bio:      { type: String, default: '' },
+
+  // Password reset
+  resetToken:   { type: String, default: null },
+  resetExpires: { type: Date, default: null }
 }, { timestamps: true });
 
 userSchema.pre('save', async function(next) {

@@ -5,10 +5,11 @@
 </div>
 
 <!-- Tab Navigation -->
-<div class="settings-tabs" style="display:flex;gap:0;margin-bottom:1.5rem">
+<div class="settings-tabs" style="display:flex;gap:0;margin-bottom:1.5rem;flex-wrap:wrap">
   <button class="settings-tab active" onclick="showTab('general')">General</button>
+  <button class="settings-tab" onclick="showTab('email')">Email / SMTP</button>
   <button class="settings-tab" onclick="showTab('code-injection')">Code Injection</button>
-  <button class="settings-tab" onclick="showTab('image-optimization')">Image Optimization</button>
+  <button class="settings-tab" onclick="showTab('image-optimization')">Images</button>
 </div>
 
 <!-- ─── Tab: General ─────────────────────────────────────── -->
@@ -58,6 +59,163 @@
     </div>
   </form>
 </div>
+
+<!-- ─── Tab: Email / SMTP ────────────────────────────────── -->
+<div id="tab-email" class="settings-tab-content" style="display:none">
+  <div class="editor-layout">
+    <div class="editor-main">
+      <% if (smtpFromEnv) { %>
+        <div class="admin-card" style="margin-bottom:1.5rem">
+          <div style="padding:1rem;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0">
+            <p style="font-size:0.875rem;color:#166534;margin:0">
+              <strong>SMTP is configured via environment variables.</strong> ENV values always take priority. To change SMTP, update your hosting platform's environment variables.
+            </p>
+          </div>
+        </div>
+      <% } %>
+
+      <form method="POST" action="/admin/settings/smtp" id="smtpForm">
+        <div class="admin-card" style="margin-bottom:1.5rem">
+          <div class="card-header">
+            <h2>SMTP Configuration</h2>
+            <% if (smtpConfigured) { %>
+              <span class="badge badge-published">Connected</span>
+            <% } else { %>
+              <span class="badge badge-draft">Not Configured</span>
+            <% } %>
+          </div>
+          <div style="padding:1rem">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:0.75rem">
+              <div class="form-group">
+                <label>SMTP Host</label>
+                <input type="text" name="host" value="<%= smtpConfig.host || '' %>" class="form-control" placeholder="smtp.gmail.com" <%= smtpFromEnv ? 'readonly' : '' %>>
+              </div>
+              <div class="form-group">
+                <label>Port</label>
+                <input type="number" name="port" value="<%= smtpConfig.port || 587 %>" class="form-control" placeholder="587" <%= smtpFromEnv ? 'readonly' : '' %>>
+              </div>
+              <div class="form-group">
+                <label>SSL/TLS</label>
+                <div style="padding-top:0.35rem">
+                  <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-weight:400">
+                    <input type="checkbox" name="secure" <%= smtpConfig.secure ? 'checked' : '' %> <%= smtpFromEnv ? 'disabled' : '' %>>
+                    Use SSL (port 465)
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+              <div class="form-group">
+                <label>SMTP Username</label>
+                <input type="text" name="user" value="<%= smtpConfig.user || '' %>" class="form-control" placeholder="you@gmail.com" <%= smtpFromEnv ? 'readonly' : '' %>>
+              </div>
+              <div class="form-group">
+                <label>SMTP Password</label>
+                <input type="password" name="pass" value="<%= smtpConfig.pass || '' %>" class="form-control" placeholder="App password or API key" <%= smtpFromEnv ? 'readonly' : '' %>>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+              <div class="form-group">
+                <label>From Name</label>
+                <input type="text" name="fromName" value="<%= smtpConfig.fromName || '' %>" class="form-control" placeholder="NodeCMS">
+              </div>
+              <div class="form-group">
+                <label>From Email</label>
+                <input type="text" name="fromEmail" value="<%= smtpConfig.fromEmail || '' %>" class="form-control" placeholder="noreply@yourdomain.com">
+              </div>
+            </div>
+          </div>
+        </div>
+        <% if (!smtpFromEnv) { %>
+          <button type="submit" class="btn btn-primary">Save SMTP Settings</button>
+        <% } %>
+      </form>
+
+      <!-- Test Email -->
+      <div class="admin-card" style="margin-top:1.5rem">
+        <div class="card-header"><h2>Test Email</h2></div>
+        <div style="padding:1rem">
+          <p style="font-size:0.85rem;color:#64748b;margin-bottom:0.75rem">Send a test email to verify your SMTP configuration.</p>
+          <div style="display:flex;gap:0.5rem;align-items:end">
+            <div class="form-group" style="flex:1;margin-bottom:0">
+              <label>Send test to</label>
+              <input type="email" id="testEmail" class="form-control" value="<%= typeof user !== 'undefined' && user ? user.email : '' %>" placeholder="you@example.com">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="sendTestEmail()" id="testBtn">Send Test</button>
+          </div>
+          <div id="testResult" style="margin-top:0.75rem;font-size:0.85rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-sidebar">
+      <div class="sidebar-panel">
+        <h3>Email Features</h3>
+        <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+          When SMTP is configured, NodeCMS sends:<br><br>
+          • <strong>Password reset</strong> emails<br>
+          • <strong>Welcome email</strong> after setup<br>
+          • <strong>Post notifications</strong> on publish
+        </p>
+        <p style="font-size:0.8rem;color:#64748b;line-height:1.5;margin-top:0.5rem">
+          SMTP is optional — everything works without it.
+        </p>
+      </div>
+      <div class="sidebar-panel">
+        <h3>Provider Quick Ref</h3>
+        <p style="font-size:0.75rem;color:#64748b;line-height:1.6">
+          <strong>Gmail:</strong> smtp.gmail.com :587<br>
+          <strong>SendGrid:</strong> smtp.sendgrid.net :587<br>
+          <strong>Mailgun:</strong> smtp.mailgun.org :587<br>
+          <strong>AWS SES:</strong> email-smtp.region.amazonaws.com :587<br>
+          <strong>Your server:</strong> mail.yourdomain.com :587
+        </p>
+      </div>
+      <div class="sidebar-panel">
+        <h3>ENV vs Admin</h3>
+        <p style="font-size:0.8rem;color:#64748b;line-height:1.5">
+          Set SMTP_HOST, SMTP_USER, SMTP_PASS as env vars on your hosting platform (Fly.io, Heroku, Coolify) and they'll override anything set here. Best practice for production.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function sendTestEmail() {
+  const btn = document.getElementById('testBtn');
+  const result = document.getElementById('testResult');
+  const email = document.getElementById('testEmail').value;
+  if (!email) return alert('Enter an email address');
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  result.innerHTML = '';
+
+  const form = document.getElementById('smtpForm');
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData);
+  data.testEmail = email;
+
+  try {
+    const res = await fetch('/admin/settings/smtp/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (json.success) {
+      result.innerHTML = '<span style="color:#16a34a">✓ ' + json.message + '</span>';
+    } else {
+      result.innerHTML = '<span style="color:#ef4444">✗ ' + json.error + '</span>';
+    }
+  } catch(e) {
+    result.innerHTML = '<span style="color:#ef4444">✗ Failed: ' + e.message + '</span>';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Test';
+}
+</script>
 
 <!-- ─── Tab: Code Injection ──────────────────────────────── -->
 <div id="tab-code-injection" class="settings-tab-content" style="display:none">

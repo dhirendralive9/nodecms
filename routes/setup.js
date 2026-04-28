@@ -2,6 +2,7 @@ const router = require('express').Router();
 const User = require('../models/User');
 const Settings = require('../models/Settings');
 const Menu = require('../models/Menu');
+const mailer = require('../utils/mailer');
 
 /**
  * One-time setup wizard
@@ -95,6 +96,10 @@ router.post('/', setupGuard, async (req, res) => {
       displayName: admin.displayName,
       avatar: ''
     };
+
+    // Send welcome email (non-blocking, don't fail setup if email fails)
+    const siteUrl = process.env.SITE_URL || `${req.protocol}://${req.get('host')}`;
+    mailer.sendWelcome(admin, `${siteUrl}/admin`, siteTitle || 'NodeCMS').catch(() => {});
 
     res.redirect('/admin');
   } catch (err) {
