@@ -38,6 +38,7 @@ app.use(flash);
 app.use(themeEngine);
 
 // ── Routes ───────────────────────────────────────────────
+app.use('/admin/setup', require('./routes/setup'));
 app.use('/admin', require('./routes/admin'));
 app.use('/admin/posts', require('./routes/posts'));
 app.use('/admin/pages', require('./routes/pages'));

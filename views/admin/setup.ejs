@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup | NodeCMS</title>
+  <link rel="stylesheet" href="/css/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .setup-body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1e293b 100%);
+      padding: 2rem 1rem;
+    }
+    .setup-container { width: 100%; max-width: 520px; }
+    .setup-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+    }
+    .setup-brand { text-align: center; margin-bottom: 2rem; }
+    .setup-brand h1 { font-size: 1.75rem; margin: 0.5rem 0 0.25rem; color: #0f172a; }
+    .setup-brand p { color: #64748b; font-size: 0.9rem; }
+    .setup-steps {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .setup-step {
+      width: 40px;
+      height: 4px;
+      border-radius: 2px;
+      background: #e2e8f0;
+    }
+    .setup-step.active { background: #2563eb; }
+    .setup-section { margin-bottom: 1.5rem; }
+    .setup-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .setup-card .form-group { margin-bottom: 0.85rem; }
+    .setup-card label { font-size: 0.8rem; font-weight: 600; color: #334155; display: block; margin-bottom: 0.3rem; }
+    .setup-card input {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #f8fafc;
+    }
+    .setup-card input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      background: #fff;
+    }
+    .setup-card input::placeholder { color: #94a3b8; }
+    .password-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .setup-submit {
+      width: 100%;
+      padding: 0.75rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .setup-submit:hover { background: #1d4ed8; }
+    .setup-footer {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .alert { margin-bottom: 1rem; padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.85rem; }
+    .alert-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    @media (max-width: 540px) {
+      .setup-card { padding: 1.75rem; }
+      .password-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="setup-body">
+  <div class="setup-container">
+    <div class="setup-card">
+      <div class="setup-brand">
+        <svg width="48" height="48" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="6" fill="#2563eb"/><path d="M8 8h4v12H8V8zm8 4h4v8h-4v-8z" fill="#fff"/></svg>
+        <h1>Welcome to NodeCMS</h1>
+        <p>Let's get your site up and running in 30 seconds.</p>
+      </div>
+
+      <div class="setup-steps">
+        <div class="setup-step active"></div>
+        <div class="setup-step active"></div>
+        <div class="setup-step"></div>
+      </div>
+
+      <% if (error) { %>
+        <div class="alert alert-error"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="/admin/setup">
+        <div class="setup-section">
+          <div class="setup-section-title">Admin Account</div>
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autofocus placeholder="admin" minlength="3">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com">
+          </div>
+          <div class="password-row">
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required placeholder="Min 6 characters" minlength="6">
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Confirm</label>
+              <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Repeat password">
+            </div>
+          </div>
+        </div>
+
+        <div class="setup-section">
+          <div class="setup-section-title">Your Site</div>
+          <div class="form-group">
+            <label for="siteTitle">Site Title</label>
+            <input type="text" id="siteTitle" name="siteTitle" placeholder="My Awesome Blog" value="NodeCMS">
+          </div>
+          <div class="form-group">
+            <label for="siteTagline">Tagline <span style="color:#94a3b8;font-weight:400">(optional)</span></label>
+            <input type="text" id="siteTagline" name="siteTagline" placeholder="A short description of your site">
+          </div>
+        </div>
+
+        <button type="submit" class="setup-submit">Create Account & Launch Site →</button>
+      </form>
+
+      <div class="setup-footer">
+        This page only appears once. After setup, access your admin at <code>/admin</code>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Client-side password match check
+    document.querySelector('form').addEventListener('submit', function(e) {
+      const pw = document.getElementById('password').value;
+      const cpw = document.getElementById('confirmPassword').value;
+      if (pw !== cpw) {
+        e.preventDefault();
+        alert('Passwords do not match');
+      }
+    });
+  </script>
+</body>
+</html>

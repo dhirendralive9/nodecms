@@ -1,5 +1,10 @@
-function requireAuth(req, res, next) {
+const User = require('../models/User');
+
+async function requireAuth(req, res, next) {
   if (!req.session.user) {
+    // Check if setup is needed (no users in DB)
+    const userCount = await User.countDocuments();
+    if (userCount === 0) return res.redirect('/admin/setup');
     return res.redirect('/admin/login');
   }
   next();

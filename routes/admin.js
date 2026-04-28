@@ -6,8 +6,13 @@ const Media = require('../models/Media');
 const { requireAuth } = require('../middleware/auth');
 
 // ── Login ────────────────────────────────────────────────
-router.get('/login', (req, res) => {
+router.get('/login', async (req, res) => {
   if (req.session.user) return res.redirect('/admin');
+
+  // If no users exist, redirect to setup wizard
+  const userCount = await User.countDocuments();
+  if (userCount === 0) return res.redirect('/admin/setup');
+
   res.render('admin/login', { error: null });
 });
 
